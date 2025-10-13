@@ -1,0 +1,12 @@
+E:\Admin\Desktop\TournamentTableDLL\TournamentTable\bin\Debug\net9.0\TournamentTable.deps.json
+E:\Admin\Desktop\TournamentTableDLL\TournamentTable\bin\Debug\net9.0\TournamentTable.dll
+E:\Admin\Desktop\TournamentTableDLL\TournamentTable\bin\Debug\net9.0\TournamentTable.pdb
+E:\Admin\Desktop\TournamentTableDLL\TournamentTable\obj\Debug\net9.0\TournamentTable.csproj.AssemblyReference.cache
+E:\Admin\Desktop\TournamentTableDLL\TournamentTable\obj\Debug\net9.0\TournamentTable.GeneratedMSBuildEditorConfig.editorconfig
+E:\Admin\Desktop\TournamentTableDLL\TournamentTable\obj\Debug\net9.0\TournamentTable.AssemblyInfoInputs.cache
+E:\Admin\Desktop\TournamentTableDLL\TournamentTable\obj\Debug\net9.0\TournamentTable.AssemblyInfo.cs
+E:\Admin\Desktop\TournamentTableDLL\TournamentTable\obj\Debug\net9.0\TournamentTable.csproj.CoreCompileInputs.cache
+E:\Admin\Desktop\TournamentTableDLL\TournamentTable\obj\Debug\net9.0\TournamentTable.dll
+E:\Admin\Desktop\TournamentTableDLL\TournamentTable\obj\Debug\net9.0\refint\TournamentTable.dll
+E:\Admin\Desktop\TournamentTableDLL\TournamentTable\obj\Debug\net9.0\TournamentTable.pdb
+E:\Admin\Desktop\TournamentTableDLL\TournamentTable\obj\Debug\net9.0\ref\TournamentTable.dll
