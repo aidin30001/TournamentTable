@@ -19,4 +19,9 @@ public class Player
     Place = place;
     Foughts = foughts == null ? new List<Opponent>() : foughts;
   }
+  public Player(int id, List<Opponent> foughts = null!)
+  {
+    Id = id;
+    Foughts = foughts == null ? new List<Opponent>() : foughts;
+  }
 }

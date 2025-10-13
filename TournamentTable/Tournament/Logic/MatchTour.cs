@@ -7,7 +7,7 @@ namespace TournamentTable.Tournament.Logic;
 
 public class MatchTour
 {
-  static List<PlayersDeserialize> players = DataManager.PlayerDeserialize().ToList();
+  static List<PlayersDeserialize>? players;
   static Random random = new Random();
   static PlayersDeserialize? playerFirst;
   static PlayersDeserialize? playersSecond;
@@ -16,17 +16,18 @@ public class MatchTour
   static int indexSecondPlayer;
   public void StartBattle()
   {
+    players = DataManager.PlayerDeserialize().ToList();
     var shuffledPlayers = players.OrderBy(
       p => random.Next()).ToList();
 
-    for (int i = 0; i < shuffledPlayers.Count() - 1; i += 2)
+    for (int i = 0; i < players.Count() - 1; i += 2)
       Battle(shuffledPlayers[i].Id, shuffledPlayers[i + 1].Id);
   }
 
   public void Battle(int id1, int id2)
   {
-    var updatePlayer = new List<Player>();
-    
+    players = DataManager.PlayerDeserialize().ToList();
+
     indexFirstPlayer = players.FindIndex(p => p.Id == id1);
     indexSecondPlayer = players.FindIndex(p => p.Id == id2);
 
@@ -44,29 +45,17 @@ public class MatchTour
       WinId = res.Win,
       LoseId = res.Lose
     };
-
-    battle.PlayerFirst.Foughts = SetOpponent(fightRound, playersSecond.Id);
-    battle.PlayerSecond.Foughts = SetOpponent(fightRound, playerFirst.Id);
+    
+    battle.PlayerFirst.Foughts = SetOpponent(playerFirst.ConvertPlayer(), fightRound, playersSecond.Id);
+    battle.PlayerSecond.Foughts = SetOpponent(playersSecond.ConvertPlayer(),fightRound, playerFirst.Id);
 
     if (res.Lose == battle.PlayerFirst.Id)
-      battle.PlayerFirst.Health = 1;
+      battle.PlayerFirst.Health -= 1;
     else
-      battle.PlayerSecond.Health = 1;
-      
-    for (int i = 0; i < players.Count; i++)
-    {
-      if (i == indexFirstPlayer)
-      {
-        updatePlayer.Add(new Player(players[i].Id, players[i].Name!, battle.PlayerFirst.Health)
-        {
-          
-        });
-      }
-
-      updatePlayer.Add(players[i].ConvertPlayer());
-    }
+      battle.PlayerSecond.Health -= 1;
 
     battle.FightUpdate();
+    players.ConvertListPlayer().PlayerUpdate(battle.PlayerFirst, battle.PlayerSecond);
   }
 
   public (int Win, int Lose) Randoms(int id1, int id2)
@@ -87,15 +76,22 @@ public class MatchTour
     return (Win, Lose);
   }
 
-  private List<Opponent> SetOpponent(int round, int id)
+  private List<Opponent> SetOpponent(Player player, int round, int id)
   {
-    return new List<Opponent>()
+    var oldFought = new List<Opponent>();
+
+    oldFought.AddRange(player.Foughts.Select(f => new Opponent
     {
-      new Opponent()
-      {
-        Round = round,
-        OpponentId = id
-      }
-    };
+      OpponentId = f.OpponentId,
+      Round = f.Round
+    }));
+
+    oldFought.Add(new Opponent()
+    {
+      Round = round,
+      OpponentId = id
+    });
+
+    return oldFought;
   }
 }

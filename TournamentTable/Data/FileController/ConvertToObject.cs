@@ -88,4 +88,13 @@ public static class ConvertToObject
       Round = i.Round
     }).ToList();
   }
+
+  public static Opponent ConvertFoughts(this OpponentDeserialize foughts)
+  {
+    return new Opponent
+    {
+      OpponentId = foughts.OpponentId,
+      Round = foughts.Round
+    };
+  }
 }

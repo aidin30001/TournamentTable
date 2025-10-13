@@ -51,6 +51,54 @@ public static class DataManager
     }
   }
 
+  public static void PlayerUpdate(this List<Player> players, Player playerFirst, Player playerSecond)
+  {
+    // Локальный метод для обновления одного игрока
+    void UpdateSingle(Player updatedPlayer)
+    {
+      // Найти игрока по Id
+      int index = players.FindIndex(p => p.Id == updatedPlayer.Id);
+
+      if (index >= 0)
+      {
+        // Копируем старые Foughts
+        var oldFoughts = players[index].Foughts != null
+            ? new List<Opponent>(players[index].Foughts)
+            : new List<Opponent>();
+
+        // Добавляем новые Foughts из updatedPlayer (без дубликатов по OpponentId + Round)
+        foreach (var f in updatedPlayer.Foughts)
+        {
+          if (!oldFoughts.Any(o => o.OpponentId == f.OpponentId && o.Round == f.Round))
+          {
+            oldFoughts.Add(f);
+          }
+        }
+
+        // Обновляем игрока с новым здоровьем и Foughts
+        players[index] = new Player(updatedPlayer.Id)
+        {
+          Name = updatedPlayer.Name!,
+          Health = updatedPlayer.Health,
+          Foughts = oldFoughts
+        };
+      }
+      else
+      {
+        // Игрока нет — добавляем нового
+        players.Add(updatedPlayer);
+      }
+    }
+
+    // Обновляем обоих игроков
+    UpdateSingle(playerFirst);
+    UpdateSingle(playerSecond);
+
+    players.PlayerCreate();
+  }
+
+
+
   public static IEnumerable<BattleDeserialize> FightDeserialize()
   {
     string json = File.ReadAllText(pathFight_Json, Encoding.UTF8);

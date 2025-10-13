@@ -10,3 +10,4 @@ E:\Admin\Desktop\TournamentTableDLL\TournamentTable\obj\Debug\net9.0\TournamentT
 E:\Admin\Desktop\TournamentTableDLL\TournamentTable\obj\Debug\net9.0\refint\TournamentTable.dll
 E:\Admin\Desktop\TournamentTableDLL\TournamentTable\obj\Debug\net9.0\TournamentTable.pdb
 E:\Admin\Desktop\TournamentTableDLL\TournamentTable\obj\Debug\net9.0\ref\TournamentTable.dll
+E:\Admin\Desktop\TournamentTableDLL\TournamentTable\obj\Debug\net9.0\TournamentTable.sourcelink.json
