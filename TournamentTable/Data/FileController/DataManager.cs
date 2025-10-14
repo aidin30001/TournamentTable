@@ -13,14 +13,14 @@ public static class DataManager
 {
   private static string pathPlayers_Json = "";
   private static string pathFight_Json = "";
-  private static string pathBracket_Json = "";
+  private static string pathEliminated_Json = "";
   public static string Path
   {
     set
     {
       pathPlayers_Json = System.IO.Path.Combine(value, "Players.json");
       pathFight_Json = System.IO.Path.Combine(value, "Fight.json");
-      pathBracket_Json = System.IO.Path.Combine(value, "Bracket.json");
+      pathEliminated_Json = System.IO.Path.Combine(value, "EliminatedPlayer.json");
     }
   }
   public static void CreateNewPlayers(this List<string> playersName, int health)
@@ -51,7 +51,7 @@ public static class DataManager
     }
   }
 
-  public static void PlayerUpdate(this List<Player> players, Player playerFirst, Player playerSecond)
+  public static void PlayerUpdate(this List<Player> players, params Player[] updatedPlayer)
   {
     // Локальный метод для обновления одного игрока
     void UpdateSingle(Player updatedPlayer)
@@ -59,45 +59,92 @@ public static class DataManager
       // Найти игрока по Id
       int index = players.FindIndex(p => p.Id == updatedPlayer.Id);
 
-      if (index >= 0)
-      {
-        // Копируем старые Foughts
-        var oldFoughts = players[index].Foughts != null
-            ? new List<Opponent>(players[index].Foughts)
-            : new List<Opponent>();
+      if (index < 0) return;
 
-        // Добавляем новые Foughts из updatedPlayer (без дубликатов по OpponentId + Round)
-        foreach (var f in updatedPlayer.Foughts)
+      // Копируем старые Foughts
+      var oldFoughts = players[index].Foughts != null
+          ? new List<Opponent>(players[index].Foughts)
+          : new List<Opponent>();
+
+      // Добавляем новые Foughts из updatedPlayer (без дубликатов по OpponentId + Round)
+      foreach (var f in updatedPlayer.Foughts)
+      {
+        if (!oldFoughts.Any(o => o.OpponentId == f.OpponentId && o.Round == f.Round))
         {
-          if (!oldFoughts.Any(o => o.OpponentId == f.OpponentId && o.Round == f.Round))
-          {
-            oldFoughts.Add(f);
-          }
+          oldFoughts.Add(f);
         }
+      }
 
-        // Обновляем игрока с новым здоровьем и Foughts
-        players[index] = new Player(updatedPlayer.Id)
-        {
-          Name = updatedPlayer.Name!,
-          Health = updatedPlayer.Health,
-          Foughts = oldFoughts
-        };
-      }
-      else
+      // Обновляем игрока с новым здоровьем и Foughts
+      players[index] = new Player(updatedPlayer.Id)
       {
-        // Игрока нет — добавляем нового
-        players.Add(updatedPlayer);
-      }
+        Name = updatedPlayer.Name!,
+        Health = updatedPlayer.Health,
+        Foughts = oldFoughts
+      };
     }
 
     // Обновляем обоих игроков
-    UpdateSingle(playerFirst);
-    UpdateSingle(playerSecond);
+    foreach (var player in updatedPlayer)
+    {
+      UpdateSingle(player);
+    }
 
     players.PlayerCreate();
   }
 
+  public static void EliminatedPlayerCreate(this List<EliminatedPlayer> players)
+  {
+    using (var fs = new FileStream(pathEliminated_Json, FileMode.Create))
+    {
+      var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(players, Formatting.None));
+      fs.Write(bytes, 0, bytes.Length);
+    }
+  }
 
+  public static void EliminatedPlayerNewCreate()
+  {
+    using (var fs = new FileStream(pathEliminated_Json, FileMode.Create))
+    {
+      var bytes = Encoding.UTF8.GetBytes("{}");
+      fs.Write(bytes, 0, bytes.Length);
+    }
+  }
+
+  public static List<PlayersDeserialize> EliminatedPlayerDeserilialize()
+  {
+    string json = File.ReadAllText(pathEliminated_Json, Encoding.UTF8);
+    var serialize = new DataContractJsonSerializer(typeof(List<PlayersDeserialize>));
+
+    using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
+    {
+      return (List<PlayersDeserialize>)serialize.ReadObject(ms)!;
+    }
+  }
+
+  public static void EliminatedPlayerUpdate(this List<EliminatedPlayer> players)
+  {
+    var readResEliminated = new List<EliminatedPlayer>();
+
+    if (File.Exists(pathEliminated_Json))
+      readResEliminated = EliminatedPlayerDeserilialize().ConvertListEliminated();
+
+    players.ForEach(p =>
+    {
+      var existing = readResEliminated.FirstOrDefault(e => e.Id == p.Id);
+
+      if (existing == null)
+        readResEliminated.Add(p);
+      else
+      {
+        existing.Health = p.Health;
+        existing.Place = p.Place;
+        existing.Foughts = p.Foughts;
+      }
+    });
+
+    readResEliminated.EliminatedPlayerCreate();
+  }
 
   public static IEnumerable<BattleDeserialize> FightDeserialize()
   {

@@ -22,6 +22,7 @@ public static class ConvertToObject
 
   public static PlayersDeserialize ConvertPlayersDes(this Player player)
   {
+    if (player == null) return new PlayersDeserialize();
     return new PlayersDeserialize()
     {
       Id = player.Id,
@@ -78,6 +79,11 @@ public static class ConvertToObject
     {
       Foughts = player.Foughts!.ConvertFoughts()
     };
+  }
+
+  public static List<EliminatedPlayer> ConvertListEliminated(this List<PlayersDeserialize> players)
+  {
+    return players.Select(p => new EliminatedPlayer(p.Id, p.Name!, p.Health, p.Place, p.Foughts!.ConvertFoughts())).ToList();
   }
 
   public static List<Opponent> ConvertFoughts(this List<OpponentDeserialize> foughts)

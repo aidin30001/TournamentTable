@@ -8,6 +8,7 @@ namespace TournamentTable.Tournament.Logic;
 public class MatchTour
 {
   static List<PlayersDeserialize>? players;
+  static List<EliminatedPlayer>? eliminateds = new List<EliminatedPlayer>();
   static Random random = new Random();
   static PlayersDeserialize? playerFirst;
   static PlayersDeserialize? playersSecond;
@@ -16,16 +17,24 @@ public class MatchTour
   static int indexSecondPlayer;
   public void StartBattle()
   {
+    eliminateds = DataManager.EliminatedPlayerDeserilialize().ConvertListEliminated();
     players = DataManager.PlayerDeserialize().ToList();
+
     var shuffledPlayers = players.OrderBy(
       p => random.Next()).ToList();
-
-    for (int i = 0; i < players.Count() - 1; i += 2)
-      Battle(shuffledPlayers[i].Id, shuffledPlayers[i + 1].Id);
+    int i = 0;
+    for (; i < shuffledPlayers.Count; i += 2)
+    {
+      if (i + 1 < shuffledPlayers.Count)
+        Battle(shuffledPlayers[i].Id, shuffledPlayers[i + 1].Id);
+      else
+        Battle(shuffledPlayers[i].Id);
+    }
   }
 
   public void Battle(int id1, int id2)
   {
+    eliminateds = DataManager.EliminatedPlayerDeserilialize().ConvertListEliminated();
     players = DataManager.PlayerDeserialize().ToList();
 
     indexFirstPlayer = players.FindIndex(p => p.Id == id1);
@@ -45,9 +54,9 @@ public class MatchTour
       WinId = res.Win,
       LoseId = res.Lose
     };
-    
+
     battle.PlayerFirst.Foughts = SetOpponent(playerFirst.ConvertPlayer(), fightRound, playersSecond.Id);
-    battle.PlayerSecond.Foughts = SetOpponent(playersSecond.ConvertPlayer(),fightRound, playerFirst.Id);
+    battle.PlayerSecond.Foughts = SetOpponent(playersSecond.ConvertPlayer(), fightRound, playerFirst.Id);
 
     if (res.Lose == battle.PlayerFirst.Id)
       battle.PlayerFirst.Health -= 1;
@@ -55,7 +64,36 @@ public class MatchTour
       battle.PlayerSecond.Health -= 1;
 
     battle.FightUpdate();
-    players.ConvertListPlayer().PlayerUpdate(battle.PlayerFirst, battle.PlayerSecond);
+
+    bool isLoser = battle.PlayerFirst.Health <= 0 || battle.PlayerSecond.Health <= 0;
+    if (isLoser)
+    {
+      var player = battle.PlayerFirst.Health <= 0 ? battle.PlayerFirst : battle.PlayerSecond;
+      eliminateds!.Add(new EliminatedPlayer(player.Id, player.Name!, player.Health, players.Count, player.Foughts));
+      eliminateds!.EliminatedPlayerUpdate();
+      var removePlayers = players.ConvertListPlayer();
+      removePlayers.RemoveAll(p => p.Id == player.Id);
+      removePlayers.PlayerUpdate(battle.PlayerFirst, battle.PlayerSecond);
+    }
+    else players.ConvertListPlayer().PlayerUpdate(battle.PlayerFirst, battle.PlayerSecond);
+  }
+
+  public void Battle(int id)
+  {
+    players = DataManager.PlayerDeserialize().ToList();
+
+    int index = players.FindIndex(p => p.Id == id);
+    fightRound = DataManager.FightDeserialize().ToList().Count + 1;
+
+    Battle battle = new Battle
+    {
+      Round = fightRound,
+      PlayerFirst = players[index].ConvertPlayer(),
+      WinId = id
+    };
+
+    battle.FightUpdate();
+    players.ConvertListPlayer().PlayerUpdate(battle.PlayerFirst);
   }
 
   public (int Win, int Lose) Randoms(int id1, int id2)
