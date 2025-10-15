@@ -8,7 +8,7 @@ namespace TournamentTable.Tournament.Logic;
 public class MatchTour
 {
   static List<PlayersDeserialize>? players;
-  static List<EliminatedPlayer>? eliminateds = new List<EliminatedPlayer>();
+  static List<Result>? result = new List<Result>();
   static Random random = new Random();
   static PlayersDeserialize? playerFirst;
   static PlayersDeserialize? playersSecond;
@@ -17,7 +17,7 @@ public class MatchTour
   static int indexSecondPlayer;
   public void StartBattle()
   {
-    eliminateds = DataManager.EliminatedPlayerDeserilialize().ConvertListEliminated();
+    result = DataManager.ResultDeserilialize().ConvertListResult();
     players = DataManager.PlayerDeserialize().ToList();
 
     var shuffledPlayers = players.OrderBy(
@@ -34,7 +34,7 @@ public class MatchTour
 
   public void Battle(int id1, int id2)
   {
-    eliminateds = DataManager.EliminatedPlayerDeserilialize().ConvertListEliminated();
+    result = DataManager.ResultDeserilialize().ConvertListResult();
     players = DataManager.PlayerDeserialize().ToList();
 
     indexFirstPlayer = players.FindIndex(p => p.Id == id1);
@@ -69,8 +69,8 @@ public class MatchTour
     if (isLoser)
     {
       var player = battle.PlayerFirst.Health <= 0 ? battle.PlayerFirst : battle.PlayerSecond;
-      eliminateds!.Add(new EliminatedPlayer(player.Id, player.Name!, player.Health, players.Count, player.Foughts));
-      eliminateds!.Update();
+      result!.Add(new Result(player.Id, player.Name!, player.Health, players.Count, player.Foughts));
+      result!.Update();
       var removePlayers = players.ConvertListPlayer();
       removePlayers.RemoveAll(p => p.Id == player.Id);
       removePlayers.Update(battle.PlayerFirst, battle.PlayerSecond);
@@ -99,10 +99,10 @@ public class MatchTour
     {
       var removePlayers = players.ConvertListPlayer();
       removePlayers.RemoveAll(p => p.Id == id);
-      removePlayers.PlayerCreate();
+      removePlayers.Create();
       var playerEliminated = battle.PlayerFirst;
-      eliminateds!.Add(new EliminatedPlayer(playerEliminated.Id, playerEliminated.Name, playerEliminated.Health, players.Count, playerEliminated.Foughts));
-      eliminateds.Update();
+      result!.Add(new Result(playerEliminated.Id, playerEliminated.Name, playerEliminated.Health, players.Count, playerEliminated.Foughts));
+      result.Update();
       return;
     }
     players.ConvertListPlayer().Update(battle.PlayerFirst);

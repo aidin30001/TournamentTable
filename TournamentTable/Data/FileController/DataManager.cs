@@ -13,14 +13,14 @@ public static class DataManager
 {
   private static string pathPlayers_Json = "";
   private static string pathFight_Json = "";
-  private static string pathEliminated_Json = "";
+  private static string pathResult_Json = "";
   public static string Path
   {
     set
     {
       pathPlayers_Json = System.IO.Path.Combine(value, "Players.json");
       pathFight_Json = System.IO.Path.Combine(value, "Fight.json");
-      pathEliminated_Json = System.IO.Path.Combine(value, "EliminatedPlayer.json");
+      pathResult_Json = System.IO.Path.Combine(value, "Result.json");
     }
   }
   public static void CreateNewPlayers(this List<string> playersName, int health)
@@ -28,7 +28,7 @@ public static class DataManager
     List<Player> players = new List<Player>();
     int id = 0;
     players.AddRange(playersName.Select(item => new Player(id += 1, item, health)));
-    players.PlayerCreate();
+    players.Create();
   }
 
   public static IEnumerable<PlayersDeserialize> PlayerDeserialize()
@@ -42,7 +42,7 @@ public static class DataManager
     }
   }
 
-  public static void PlayerCreate(this List<Player> players)
+  public static void Create(this List<Player> players)
   {
     using (var fs = new FileStream(pathPlayers_Json, FileMode.Create))
     {
@@ -90,30 +90,30 @@ public static class DataManager
       UpdateSingle(player);
     }
 
-    players.PlayerCreate();
+    players.Create();
   }
 
-  public static void Create(this List<EliminatedPlayer> players)
+  public static void Create(this List<Result> players)
   {
-    using (var fs = new FileStream(pathEliminated_Json, FileMode.Create))
+    using (var fs = new FileStream(pathResult_Json, FileMode.Create))
     {
       var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(players, Formatting.None));
       fs.Write(bytes, 0, bytes.Length);
     }
   }
 
-  public static void EliminatedPlayerNewCreate()
+  public static void ResultNewCreate()
   {
-    using (var fs = new FileStream(pathEliminated_Json, FileMode.Create))
+    using (var fs = new FileStream(pathResult_Json, FileMode.Create))
     {
       var bytes = Encoding.UTF8.GetBytes("{}");
       fs.Write(bytes, 0, bytes.Length);
     }
   }
 
-  public static List<PlayersDeserialize> EliminatedPlayerDeserilialize()
+  public static List<PlayersDeserialize> ResultDeserilialize()
   {
-    string json = File.ReadAllText(pathEliminated_Json, Encoding.UTF8);
+    string json = File.ReadAllText(pathResult_Json, Encoding.UTF8);
     var serialize = new DataContractJsonSerializer(typeof(List<PlayersDeserialize>));
 
     using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
@@ -122,19 +122,19 @@ public static class DataManager
     }
   }
 
-  public static void Update(this List<EliminatedPlayer> players)
+  public static void Update(this List<Result> players)
   {
-    var readResEliminated = new List<EliminatedPlayer>();
+    var readResulst = new List<Result>();
 
-    if (File.Exists(pathEliminated_Json))
-      readResEliminated = EliminatedPlayerDeserilialize().ConvertListEliminated();
+    if (File.Exists(pathResult_Json))
+      readResulst = ResultDeserilialize().ConvertListResult();
 
     players.ForEach(p =>
     {
-      var existing = readResEliminated.FirstOrDefault(e => e.Id == p.Id);
+      var existing = readResulst.FirstOrDefault(e => e.Id == p.Id);
 
       if (existing == null)
-        readResEliminated.Add(p);
+        readResulst.Add(p);
       else
       {
         existing.Health = p.Health;
@@ -143,7 +143,7 @@ public static class DataManager
       }
     });
 
-    readResEliminated.Create();
+    readResulst.Create();
   }
 
   public static IEnumerable<BattleDeserialize> FightDeserialize()

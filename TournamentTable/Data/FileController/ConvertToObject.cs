@@ -81,9 +81,9 @@ public static class ConvertToObject
     };
   }
 
-  public static List<EliminatedPlayer> ConvertListEliminated(this List<PlayersDeserialize> players)
+  public static List<Result> ConvertListResult(this List<PlayersDeserialize> players)
   {
-    return players.Select(p => new EliminatedPlayer(p.Id, p.Name!, p.Health, p.Place, p.Foughts!.ConvertFoughts())).ToList();
+    return players.Select(p => new Result(p.Id, p.Name!, p.Health, p.Place, p.Foughts!.ConvertFoughts())).ToList();
   }
 
   public static List<Opponent> ConvertFoughts(this List<OpponentDeserialize> foughts)

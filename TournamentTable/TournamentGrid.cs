@@ -17,7 +17,7 @@ public class TournamentGrid
 
     new Battle().Create();
 
-    DataManager.EliminatedPlayerNewCreate();
+    DataManager.ResultNewCreate();
   }
 
   public void Start()

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TournamentTable")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0752730c3a33d3e73e985cbda7d78f5baa24050c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e4ca53cb4288ab73e2d23b1e1fd58308d947d304")]
 [assembly: System.Reflection.AssemblyProductAttribute("TournamentTable")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TournamentTable")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
