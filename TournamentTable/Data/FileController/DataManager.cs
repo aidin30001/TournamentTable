@@ -51,7 +51,7 @@ public static class DataManager
     }
   }
 
-  public static void PlayerUpdate(this List<Player> players, params Player[] updatedPlayer)
+  public static void Update(this List<Player> players, params Player[] updatedPlayer)
   {
     // Локальный метод для обновления одного игрока
     void UpdateSingle(Player updatedPlayer)
@@ -93,7 +93,7 @@ public static class DataManager
     players.PlayerCreate();
   }
 
-  public static void EliminatedPlayerCreate(this List<EliminatedPlayer> players)
+  public static void Create(this List<EliminatedPlayer> players)
   {
     using (var fs = new FileStream(pathEliminated_Json, FileMode.Create))
     {
@@ -122,7 +122,7 @@ public static class DataManager
     }
   }
 
-  public static void EliminatedPlayerUpdate(this List<EliminatedPlayer> players)
+  public static void Update(this List<EliminatedPlayer> players)
   {
     var readResEliminated = new List<EliminatedPlayer>();
 
@@ -143,7 +143,7 @@ public static class DataManager
       }
     });
 
-    readResEliminated.EliminatedPlayerCreate();
+    readResEliminated.Create();
   }
 
   public static IEnumerable<BattleDeserialize> FightDeserialize()
@@ -157,7 +157,7 @@ public static class DataManager
     }
   }
 
-  public static void FightUpdate(this Battle battle)
+  public static void Update(this Battle battle)
   {
     var readResBattle = new List<BattleDeserialize>();
 
@@ -177,7 +177,7 @@ public static class DataManager
     }
   }
 
-  public static void FightCreate(this Battle battle)
+  public static void Create(this Battle battle)
   {
     using (var fs = new FileStream(pathFight_Json, FileMode.Create))
     {

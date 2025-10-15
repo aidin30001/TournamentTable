@@ -63,19 +63,20 @@ public class MatchTour
     else
       battle.PlayerSecond.Health -= 1;
 
-    battle.FightUpdate();
+    battle.Update();
 
     bool isLoser = battle.PlayerFirst.Health <= 0 || battle.PlayerSecond.Health <= 0;
     if (isLoser)
     {
       var player = battle.PlayerFirst.Health <= 0 ? battle.PlayerFirst : battle.PlayerSecond;
       eliminateds!.Add(new EliminatedPlayer(player.Id, player.Name!, player.Health, players.Count, player.Foughts));
-      eliminateds!.EliminatedPlayerUpdate();
+      eliminateds!.Update();
       var removePlayers = players.ConvertListPlayer();
       removePlayers.RemoveAll(p => p.Id == player.Id);
-      removePlayers.PlayerUpdate(battle.PlayerFirst, battle.PlayerSecond);
+      removePlayers.Update(battle.PlayerFirst, battle.PlayerSecond);
+      return;
     }
-    else players.ConvertListPlayer().PlayerUpdate(battle.PlayerFirst, battle.PlayerSecond);
+    players.ConvertListPlayer().Update(battle.PlayerFirst, battle.PlayerSecond);
   }
 
   public void Battle(int id)
@@ -92,8 +93,19 @@ public class MatchTour
       WinId = id
     };
 
-    battle.FightUpdate();
-    players.ConvertListPlayer().PlayerUpdate(battle.PlayerFirst);
+    battle.Update();
+
+    if (players.Count <= 1)
+    {
+      var removePlayers = players.ConvertListPlayer();
+      removePlayers.RemoveAll(p => p.Id == id);
+      removePlayers.PlayerCreate();
+      var playerEliminated = battle.PlayerFirst;
+      eliminateds!.Add(new EliminatedPlayer(playerEliminated.Id, playerEliminated.Name, playerEliminated.Health, players.Count, playerEliminated.Foughts));
+      eliminateds.Update();
+      return;
+    }
+    players.ConvertListPlayer().Update(battle.PlayerFirst);
   }
 
   public (int Win, int Lose) Randoms(int id1, int id2)

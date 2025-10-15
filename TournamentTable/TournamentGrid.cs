@@ -15,7 +15,7 @@ public class TournamentGrid
     DataManager.Path = path;
     playersName.CreateNewPlayers(health);
 
-    new Battle().FightCreate();
+    new Battle().Create();
 
     DataManager.EliminatedPlayerNewCreate();
   }
