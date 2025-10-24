@@ -1,6 +1,7 @@
 using System;
 using TournamentTable.Data.FileController;
 using TournamentTable.Data.Players;
+using TournamentTable.Data.Tournament;
 using TournamentTable.Players;
 
 namespace TournamentTable.Tournament.Logic;
@@ -17,24 +18,26 @@ public class MatchTour
   static int indexSecondPlayer;
   public void StartBattle()
   {
-    result = DataManager.ResultDeserilialize().ConvertListResult();
+    result = DataManager.ResultDeserilialize().ToList().ConvertListResult();
     players = DataManager.PlayerDeserialize().ToList();
+    var shuffledPlayers = DataManager.UpcomingFightDeserialize().ToList();
 
-    var shuffledPlayers = players.OrderBy(
-      p => random.Next()).ToList();
-    int i = 0;
-    for (; i < shuffledPlayers.Count; i += 2)
+    foreach (var item in shuffledPlayers)
     {
-      if (i + 1 < shuffledPlayers.Count)
-        Battle(shuffledPlayers[i].Id, shuffledPlayers[i + 1].Id);
+      if (item.IsCompleted == true) continue;
+      if (item.PlayerSecondId == 0 || item.PlayerFirstId == 0)
+        Battle(item.PlayerFirstId != 0 ? item.PlayerFirstId : item.PlayerSecondId);
       else
-        Battle(shuffledPlayers[i].Id);
+        Battle(item.PlayerFirstId, item.PlayerSecondId);
+      item.IsCompleted = true;
     }
+
+    shuffledPlayers.ConvertListUpcomingFight().Update();
   }
 
   public void Battle(int id1, int id2)
   {
-    result = DataManager.ResultDeserilialize().ConvertListResult();
+    result = DataManager.ResultDeserilialize().ToList().ConvertListResult();
     players = DataManager.PlayerDeserialize().ToList();
 
     indexFirstPlayer = players.FindIndex(p => p.Id == id1);

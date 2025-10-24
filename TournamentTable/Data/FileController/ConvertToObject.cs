@@ -3,6 +3,7 @@ using TournamentTable.Data.Players;
 using TournamentTable.Data.Tournament;
 using TournamentTable.Players;
 using TournamentTable.Tournament;
+using TournamentTable.Tournament.Info;
 
 namespace TournamentTable.Data.FileController;
 
@@ -84,6 +85,16 @@ public static class ConvertToObject
   public static List<Result> ConvertListResult(this List<PlayersDeserialize> players)
   {
     return players.Select(p => new Result(p.Id, p.Name!, p.Health, p.Place, p.Foughts!.ConvertFoughts())).ToList();
+  }
+
+  public static List<UpcomingFight> ConvertListUpcomingFight(this List<UpcomingFightDeserialize> upcoming)
+  {
+    return upcoming.Select(u => new UpcomingFight(u.Round)
+    {
+      PlayerFirstId = u.PlayerFirstId,
+      PlayerSecondId = u.PlayerSecondId,
+      IsCompleted = u.IsCompleted
+    }).ToList();
   }
 
   public static List<Opponent> ConvertFoughts(this List<OpponentDeserialize> foughts)

@@ -6,6 +6,7 @@ using TournamentTable.Data.Players;
 using System.Runtime.Serialization.Json;
 using TournamentTable.Tournament;
 using TournamentTable.Data.Tournament;
+using TournamentTable.Tournament.Info;
 
 namespace TournamentTable.Data.FileController;
 
@@ -14,6 +15,7 @@ public static class DataManager
   private static string pathPlayers_Json = "";
   private static string pathFight_Json = "";
   private static string pathResult_Json = "";
+  private static string pathUpcomingFight_Json = "";
   public static string Path
   {
     set
@@ -21,14 +23,23 @@ public static class DataManager
       pathPlayers_Json = System.IO.Path.Combine(value, "Players.json");
       pathFight_Json = System.IO.Path.Combine(value, "Fight.json");
       pathResult_Json = System.IO.Path.Combine(value, "Result.json");
+      pathUpcomingFight_Json = System.IO.Path.Combine(value, "UpcomingFight.json");
     }
   }
-  public static void CreateNewPlayers(this List<string> playersName, int health)
+  public static void PlayersNewCreate(this List<string> playersName, int health)
   {
     List<Player> players = new List<Player>();
     int id = 0;
     players.AddRange(playersName.Select(item => new Player(id += 1, item, health)));
     players.Create();
+  }
+  public static void ResultNewCreate()
+  {
+    using (var fs = new FileStream(pathResult_Json, FileMode.Create))
+    {
+      var bytes = Encoding.UTF8.GetBytes("{}");
+      fs.Write(bytes, 0, bytes.Length);
+    }
   }
 
   public static IEnumerable<PlayersDeserialize> PlayerDeserialize()
@@ -37,9 +48,34 @@ public static class DataManager
     var serialize = new DataContractJsonSerializer(typeof(List<PlayersDeserialize>));
 
     using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
-    {
       return (List<PlayersDeserialize>)serialize.ReadObject(ms)!;
-    }
+  }
+
+  public static IEnumerable<BattleDeserialize> FightDeserialize()
+  {
+    string json = File.ReadAllText(pathFight_Json, Encoding.UTF8);
+    var serialize = new DataContractJsonSerializer(typeof(List<BattleDeserialize>));
+
+    using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
+      return (List<BattleDeserialize>)serialize.ReadObject(ms)!;
+  }
+
+  public static IEnumerable<UpcomingFightDeserialize> UpcomingFightDeserialize()
+  {
+    string json = File.ReadAllText(pathUpcomingFight_Json, Encoding.UTF8);
+    var serialize = new DataContractJsonSerializer(typeof(List<UpcomingFightDeserialize>));
+
+    using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
+      return (List<UpcomingFightDeserialize>)serialize.ReadObject(ms)!;
+  }
+
+  public static IEnumerable<PlayersDeserialize> ResultDeserilialize()
+  {
+    string json = File.ReadAllText(pathResult_Json, Encoding.UTF8);
+    var serialize = new DataContractJsonSerializer(typeof(List<PlayersDeserialize>));
+
+    using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
+      return (List<PlayersDeserialize>)serialize.ReadObject(ms)!;
   }
 
   public static void Create(this List<Player> players)
@@ -47,6 +83,33 @@ public static class DataManager
     using (var fs = new FileStream(pathPlayers_Json, FileMode.Create))
     {
       var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(players, Formatting.None));
+      fs.Write(bytes, 0, bytes.Length);
+    }
+  }
+
+  public static void Create(this List<UpcomingFight> upcoming)
+  {
+    using (var fs = new FileStream(pathUpcomingFight_Json, FileMode.Create))
+    {
+      var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(upcoming, Formatting.None));
+      fs.Write(bytes, 0, bytes.Length);
+    }
+  }
+
+  public static void Create(this List<Result> players)
+  {
+    using (var fs = new FileStream(pathResult_Json, FileMode.Create))
+    {
+      var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(players, Formatting.None));
+      fs.Write(bytes, 0, bytes.Length);
+    }
+  }
+
+  public static void Create(this Battle battle)
+  {
+    using (var fs = new FileStream(pathFight_Json, FileMode.Create))
+    {
+      var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(battle, Formatting.None));
       fs.Write(bytes, 0, bytes.Length);
     }
   }
@@ -93,41 +156,12 @@ public static class DataManager
     players.Create();
   }
 
-  public static void Create(this List<Result> players)
-  {
-    using (var fs = new FileStream(pathResult_Json, FileMode.Create))
-    {
-      var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(players, Formatting.None));
-      fs.Write(bytes, 0, bytes.Length);
-    }
-  }
-
-  public static void ResultNewCreate()
-  {
-    using (var fs = new FileStream(pathResult_Json, FileMode.Create))
-    {
-      var bytes = Encoding.UTF8.GetBytes("{}");
-      fs.Write(bytes, 0, bytes.Length);
-    }
-  }
-
-  public static List<PlayersDeserialize> ResultDeserilialize()
-  {
-    string json = File.ReadAllText(pathResult_Json, Encoding.UTF8);
-    var serialize = new DataContractJsonSerializer(typeof(List<PlayersDeserialize>));
-
-    using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
-    {
-      return (List<PlayersDeserialize>)serialize.ReadObject(ms)!;
-    }
-  }
-
   public static void Update(this List<Result> players)
   {
     var readResulst = new List<Result>();
 
     if (File.Exists(pathResult_Json))
-      readResulst = ResultDeserilialize().ConvertListResult();
+      readResulst = ResultDeserilialize().ToList().ConvertListResult();
 
     players.ForEach(p =>
     {
@@ -146,15 +180,27 @@ public static class DataManager
     readResulst.Create();
   }
 
-  public static IEnumerable<BattleDeserialize> FightDeserialize()
+  public static void Update(this List<UpcomingFight> upcomings)
   {
-    string json = File.ReadAllText(pathFight_Json, Encoding.UTF8);
-    var serialize = new DataContractJsonSerializer(typeof(List<BattleDeserialize>));
+    var readResUpcoming = new List<UpcomingFight>();
 
-    using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
+    if (File.Exists(pathUpcomingFight_Json))
+      readResUpcoming = UpcomingFightDeserialize().ToList().ConvertListUpcomingFight();
+
+    upcomings.ForEach(u =>
     {
-      return (List<BattleDeserialize>)serialize.ReadObject(ms)!;
-    }
+      var existing = readResUpcoming.FirstOrDefault(_u => _u.Round == u.Round);
+      if (existing == null)
+        readResUpcoming.Add(u);
+      else
+      {
+        existing.PlayerFirstId = u.PlayerFirstId;
+        existing.PlayerSecondId = u.PlayerSecondId;
+        existing.IsCompleted = u.IsCompleted;
+      }
+    });
+
+    readResUpcoming.Create();
   }
 
   public static void Update(this Battle battle)
@@ -173,15 +219,6 @@ public static class DataManager
     using (var fs = new FileStream(pathFight_Json, FileMode.Create))
     {
       var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(readResBattle, Formatting.None));
-      fs.Write(bytes, 0, bytes.Length);
-    }
-  }
-
-  public static void Create(this Battle battle)
-  {
-    using (var fs = new FileStream(pathFight_Json, FileMode.Create))
-    {
-      var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(battle, Formatting.None));
       fs.Write(bytes, 0, bytes.Length);
     }
   }
