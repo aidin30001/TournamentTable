@@ -66,8 +66,18 @@ public class TournamentGrid
     upcomings.Update();
   }
 
-  public void Next()
+  public bool Next()
   {
+    var _upcoming = DataManager.UpcomingFightDeserialize().ToList();
+
+    int index = _upcoming.FindIndex(u => !u.IsCompleted);
+
+    if (index == -1) return false;
+
+    new MatchTour().Battle(_upcoming[index].PlayerFirstId, _upcoming[index].PlayerSecondId);
     
+    _upcoming[index].IsCompleted = true;
+    _upcoming.ConvertListUpcomingFight().Update();
+    return true;
   }
 }
