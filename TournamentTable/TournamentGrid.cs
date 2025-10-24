@@ -75,17 +75,16 @@ public class TournamentGrid
     if (index == -1) return false;
 
     _upcoming[index].IsCompleted = true;
-    _upcoming.ConvertListUpcomingFight().Update();
 
-    if (_upcoming[index].PlayerSecondId == 0 || _upcoming[index].PlayerFirstId == 0)
+    if (_upcoming[index].PlayerSecondId == 0)
     {
-      int _id = _upcoming[index].PlayerFirstId != 0 ? _upcoming[index].PlayerSecondId : _upcoming[index].PlayerSecondId;
-
-      new MatchTour().Battle(_id);
+      new MatchTour().Battle(_upcoming[index].PlayerFirstId);
+      _upcoming.ConvertListUpcomingFight().Update();
       return true;
     }
 
     new MatchTour().Battle(_upcoming[index].PlayerFirstId, _upcoming[index].PlayerSecondId);
+    _upcoming.ConvertListUpcomingFight().Update();
     return true;
   }
   
