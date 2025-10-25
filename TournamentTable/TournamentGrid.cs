@@ -14,6 +14,7 @@ namespace TournamentTable;
 public class TournamentGrid
 {
   static int playerCount = 0;
+  static List<UpcomingFight>? upcomings;
   static Random random = new Random();
   
 
@@ -38,9 +39,9 @@ public class TournamentGrid
 
   public void Info()
   {
-    var shuffledPlayers = DataManager.PlayerDeserialize().OrderBy(
+     var shuffledPlayers = DataManager.PlayerDeserialize().OrderBy(
       p => random.Next()).ToList();
-    List<UpcomingFight> upcomings = new List<UpcomingFight>();
+    upcomings = new List<UpcomingFight>();
     var startId = DataManager.UpcomingFightDeserialize().ToList().Count;
 
     for (int i = 0; i < shuffledPlayers.Count; i+=2)
@@ -68,28 +69,28 @@ public class TournamentGrid
 
   public bool Next()
   {
-    var _upcoming = DataManager.UpcomingFightDeserialize().ToList();
+    if (upcomings is null) Info();
+    int index = upcomings!.FindIndex(u => !u.IsCompleted);
 
-    int index = _upcoming.FindIndex(u => !u.IsCompleted);
-
-    if (index == -1) return false;
-
-    _upcoming[index].IsCompleted = true;
-
-    if (_upcoming[index].PlayerSecondId == 0)
+    if (index < 0) return false;
+    
+    if (upcomings[index].PlayerSecondId == 0)
     {
-      new MatchTour().Battle(_upcoming[index].PlayerFirstId);
-      _upcoming.ConvertListUpcomingFight().Update();
+      new MatchTour().Battle(upcomings[index].PlayerFirstId);
+      upcomings[index].IsCompleted = true;
+      upcomings.Update();
       return true;
     }
 
-    new MatchTour().Battle(_upcoming[index].PlayerFirstId, _upcoming[index].PlayerSecondId);
-    _upcoming.ConvertListUpcomingFight().Update();
+    new MatchTour().Battle(upcomings[index].PlayerFirstId, upcomings[index].PlayerSecondId);
+    upcomings[index].IsCompleted = true;
+    upcomings.Update();
     return true;
   }
   
-  public void Battle()
+  public bool IsCompleted()
   {
-    
+    var _upcoming = DataManager.UpcomingFightDeserialize().ToList();
+    return _upcoming[_upcoming.Count - 1].IsCompleted;
   }
 }

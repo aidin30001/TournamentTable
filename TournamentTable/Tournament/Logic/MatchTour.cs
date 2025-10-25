@@ -93,6 +93,7 @@ public class MatchTour
     {
       Round = fightRound,
       PlayerFirst = players[index].ConvertPlayer(),
+      PlayerSecond = null,
       WinId = id
     };
 
